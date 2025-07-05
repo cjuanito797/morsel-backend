@@ -1,0 +1,25 @@
+<mjml>
+  <mj-body>
+    <mj-section background-color="#ffffff" padding="20px">
+      <mj-column>
+        <mj-text font-size="20px" font-weight="bold" color="#333">
+          Hello {{ name }},
+        </mj-text>
+
+        <mj-text font-size="16px" color="#555">
+          Your order <strong>#{{ order_number }}</strong> is ready for pickup! 🎉
+        </mj-text>
+
+        <mj-text font-size="16px" color="#555">
+          📍 <strong>Pickup Time:</strong> {{ pickup_time }}
+        </mj-text>
+
+        <mj-divider border-color="#eeeeee" />
+
+        <mj-text font-size="14px" color="#999">
+          Thank you for choosing us.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>

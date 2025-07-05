@@ -1,0 +1,96 @@
+<mjml>
+  <mj-head>
+    <mj-title>Delivery Order Confirmation</mj-title>
+    <mj-font name="Inter" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" />
+    <mj-preview>Your delivery order is confirmed!</mj-preview>
+  </mj-head>
+
+  <mj-body background-url="https://yourdomain.com/static/email-bg.jpg" background-size="cover" background-repeat="no-repeat" background-color="#f6f9fc">
+
+    <!-- Logo / Branding -->
+    <mj-section padding="30px 0">
+      <mj-column>
+        <mj-image width="120px" src="https://storage.googleapis.com/morsel_pro/logo.webp" alt="Logo" align="center" />
+      </mj-column>
+    </mj-section>
+
+    <!-- White Card Container -->
+    <mj-section background-color="#ffffff" border-radius="12px" padding="40px" css-class="card" width="600px">
+      <mj-column>
+
+        <mj-text font-size="20px" font-weight="bold" align="center" color="#1a1a1a">
+          Your Delivery Order Is Confirmed
+        </mj-text>
+
+        <mj-divider border-color="#ddd" />
+
+        <mj-text font-size="16px" color="#333">
+          Hi {{ name }},
+          <br /><br />
+          Thanks for your order. Here are the details for your delivery order:
+        </mj-text>
+
+        <mj-text font-size="14px" color="#555" padding-top="10px">
+          <strong>Order Number:</strong> {{ order_number }}<br />
+          <strong>Deliver To:</strong> {{ delivery_address }}<br />
+          <strong>Total:</strong> ${{ total }}
+          <br/>
+          <strong>Track Your Order</strong>
+          <br/>
+          {{ tracking_url }}
+        </mj-text>
+
+        <mj-divider border-color="#eee" padding="16px 0" />
+
+        <mj-text font-size="16px" font-weight="bold" color="#1a1a1a">Items</mj-text>
+
+        {% for item in order_items %}
+        <mj-text font-size="14px" color="#444"
+                 padding-left="25px">
+          • {{ item.quantity }} × {{ item.product.name }}
+
+
+
+          {% if item.special_instructions %}
+            <br /><em style="color:#888;">“{{ item.special_instructions }}”</em>
+          {% endif %}
+
+          {% if item.extras %}
+            <br/><em>Extras In Order</em>
+            <br/><em style="color: #888">{{item.extras.name}}</em>
+          {% endif %}
+
+          <br/>
+
+          {% if item.ingredients_instructions %}
+            <br/><em>Your Customizations</em>
+            {% for value in item.ingredients_instructions %}
+
+              <br/><em>{{value.selectionType}} {{value.name}}</em>
+
+            {% endfor %}
+          {% endif %}
+
+        </mj-text>
+        {% endfor %}
+
+        <!--
+        <mj-button background-color="#222" color="#fff" border-radius="6px" font-size="14px" href="https://morselpro.com/orders/{{ order_number }}" padding="24px 0 0">
+          View Your Order
+        </mj-button>
+        -->
+
+      </mj-column>
+    </mj-section>
+
+    <!-- Footer -->
+    <mj-section padding="20px 0">
+      <mj-column>
+        <mj-text font-size="12px" color="#888" align="center">
+          Juanito's • 722 Creek Top. • Council Bluffs, Iowa
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+  </mj-body>
+</mjml>

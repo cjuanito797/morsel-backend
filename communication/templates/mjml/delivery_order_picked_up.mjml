@@ -1,0 +1,60 @@
+<mjml>
+    <mj-head>
+        <mj-title>Delivery Order Confirmation</mj-title>
+        <mj-font name="Inter"
+                 href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap"/>
+        <mj-preview>Your delivery order is confirmed!</mj-preview>
+    </mj-head>
+
+    <mj-body background-url="https://yourdomain.com/static/email-bg.jpg"
+             background-size="cover" background-repeat="no-repeat"
+             background-color="#f6f9fc">
+
+        <!-- Logo / Branding -->
+        <mj-section padding="30px 0">
+            <mj-column>
+                <mj-image width="120px"
+                          src="https://storage.googleapis.com/morsel_pro/logo.webp"
+                          alt="Logo" align="center"/>
+            </mj-column>
+        </mj-section>
+
+        <!-- White Card Container -->
+        <mj-section background-color="#ffffff" border-radius="12px"
+                    padding="40px" css-class="card" width="600px">
+            <mj-column>
+                <mj-text font-size="20px" font-weight="bold" align="center"
+                         color="#1a1a1a">
+                    Your Delivery Order Is Confirmed
+                </mj-text>
+
+                <mj-divider border-color="#ddd"/>
+
+                <mj-text font-size="16px" color="#333">
+                    Hi {{ name }}, your delivery order has been picked up! Your
+                    order is being delivered by {{driver_name}}.
+                    <br/>
+                    <br/>
+                </mj-text>
+
+                <mj-text font-size="16px" color="#333">
+                    You can track your order at:
+                    <br/>
+                    {{tracking_url}}
+                </mj-text>
+
+                <mj-divider border-color="#eee" padding="16px 0"/>
+            </mj-column>
+        </mj-section>
+
+        <!-- Footer -->
+        <mj-section padding="20px 0">
+            <mj-column>
+                <mj-text font-size="12px" color="#888" align="center">
+                    Juanito's • 722 Creek Top. • Council Bluffs, Iowa
+                </mj-text>
+            </mj-column>
+        </mj-section>
+
+    </mj-body>
+</mjml>
