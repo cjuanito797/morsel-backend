@@ -18,7 +18,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-_-*-05&zfh!d=(e0s%@cjot-db4&@=5*hev5-0h#wl%c&(+fdf'
 DEBUG = True
 ALLOWED_HOSTS = ['morsel-backend.ngrok.io', 'admin.juanitosmexicancb.com',
-                 '127.0.0.1', 'localhost', 'https://juanitos-frontend-81093019652.us-central1.run.app']
+                 '127.0.0.1', 'localhost',
+                 'https://juanitos-frontend-81093019652.us-central1.run.app', "https://www.juanitosmexicancb.com"]
 
 # Apps
 INSTALLED_APPS = [
@@ -160,6 +161,7 @@ CORS_ALLOWED_ORIGINS = [
     "https://morsel-frontend.ngrok.io",
     "https://morsel-backend.ngrok.io",
     "https://juanitos-frontend-81093019652.us-central1.run.app/",
+    "https://www.juanitosmexicancb.com",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -170,6 +172,7 @@ CSRF_TRUSTED_ORIGINS = [
     "https://morsel-frontend.ngrok.io",
     "https://morsel-backend.ngrok.io",
     "https://juanitos-frontend-81093019652.us-central1.run.app/",
+    "https://www.juanitosmexicancb.com",
 ]
 
 # Uber (if still in use)
