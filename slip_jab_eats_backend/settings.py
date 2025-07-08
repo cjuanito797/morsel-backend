@@ -167,6 +167,7 @@ CORS_ALLOWED_ORIGINS = [
     "https://morsel-backend.ngrok.io",
     "https://juanitos-frontend-81093019652.us-central1.run.app",
     "https://www.juanitosmexicancb.com",
+    "https://juanitosmexicancb.com"
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -178,6 +179,7 @@ CSRF_TRUSTED_ORIGINS = [
     "https://morsel-backend.ngrok.io",
     "https://juanitos-frontend-81093019652.us-central1.run.app",
     "https://www.juanitosmexicancb.com",
+    "https://juanitosmexicancb.com"
 ]
 
 # Uber (if still in use)
