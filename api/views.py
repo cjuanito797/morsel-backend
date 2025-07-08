@@ -16,6 +16,7 @@ from rest_framework.parsers import JSONParser
 from django.core.files.base import ContentFile
 import base64
 import uuid
+from django.db import transaction
 from decimal import Decimal, InvalidOperation
 from .utils.openai_image import generate_ingredient_image
 import logging
@@ -179,73 +180,72 @@ class CreateProductAPIView(APIView):
 
     def post(self, request):
         try:
-            logger.info("Received product creation request.")
-
+            # Fail fast if missing
             name = request.data.get('name', '').strip()
             description = request.data.get('description', '').strip()
             raw_category = request.data.get('category', '').strip()
+            price_raw = request.data.get('price', '').strip()
             image = request.FILES.get('image')
 
+            if not all([name, description, raw_category, price_raw]):
+                return Response({'error': 'Missing required fields.'}, status=400)
+
             try:
-                price = Decimal(request.data.get('price'))
+                price = Decimal(price_raw)
             except (TypeError, InvalidOperation):
                 return Response({'error': 'Invalid price format.'}, status=400)
 
-            ingredients = json.loads(request.data.get('ingredients', '[]'))
-            extras = json.loads(request.data.get('extras', '[]'))
-
-            if not all([name, description, price, raw_category]):
-                return Response({'error': 'Missing required fields.'}, status=400)
-
-            # Handle existing category by ID or create new category by name
             try:
-                if raw_category.isdigit():
-                    category = Category.objects.get(id=int(raw_category))
-                else:
-                    category, _ = Category.objects.get_or_create(name=raw_category)
-            except Category.DoesNotExist:
-                return Response({'error': 'Invalid category ID.'}, status=400)
+                ingredients = json.loads(request.data.get('ingredients', '[]'))
+                extras = json.loads(request.data.get('extras', '[]'))
+            except json.JSONDecodeError:
+                return Response({'error': 'Invalid JSON format.'}, status=400)
 
-            product = Product.objects.create(
-                name=name,
-                description=description,
-                price=price,
-                category=category,
-                image=image,
-                slug=slugify(name)
-            )
+            # Resolve or create category
+            if raw_category.isdigit():
+                try:
+                    category = Category.objects.only("id", "name").get(id=int(raw_category))
+                except Category.DoesNotExist:
+                    return Response({'error': 'Invalid category ID.'}, status=400)
+            else:
+                category, _ = Category.objects.get_or_create(name=raw_category)
 
-            # Handle Ingredients
-            for ing in ingredients:
-                ing_name = ing.get('name', '').strip()
-                ing_price = ing.get('price', 0.0)
-
-                if not ing_name:
-                    continue
-
-                ingredient, _ = Ingredient.objects.get_or_create(
-                    name=ing_name,
-                    defaults={'extra_price': ing_price}
+            # Wrap DB operations in transaction for consistency & speed
+            with transaction.atomic():
+                product = Product.objects.create(
+                    name=name,
+                    description=description,
+                    price=price,
+                    category=category,
+                    image=image,
+                    slug=slugify(name)
                 )
-                product.ingredients.add(ingredient)
 
-            # Handle Extras
-            for ex in extras:
-                ex_name = ex.get('name', '').strip()
-                ex_price = ex.get('price', 0.0)
+                # Ingredient linking
+                for ing in ingredients:
+                    ing_name = ing.get('name', '').strip()
+                    if not ing_name:
+                        continue
+                    ing_price = ing.get('price', 0.0)
+                    ingredient, _ = Ingredient.objects.get_or_create(
+                        name=ing_name,
+                        defaults={'extra_price': ing_price}
+                    )
+                    product.ingredients.add(ingredient)
 
-                if not ex_name:
-                    continue
+                # Extras linking
+                for ex in extras:
+                    ex_name = ex.get('name', '').strip()
+                    if not ex_name:
+                        continue
+                    ex_price = ex.get('price', 0.0)
+                    extra, _ = Extras.objects.get_or_create(
+                        name=ex_name,
+                        defaults={'price': ex_price}
+                    )
+                    product.extras.add(extra)
 
-                extra, _ = Extras.objects.get_or_create(
-                    name=ex_name,
-                    defaults={'price': ex_price}
-                )
-                product.extras.add(extra)
-
-            logger.info(f"Created product: {product.name}")
             return Response({'success': True, 'product_id': product.id}, status=201)
 
         except Exception as e:
-            logger.exception("Unhandled error during product creation")
             return Response({'error': str(e)}, status=500)
