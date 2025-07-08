@@ -173,6 +173,7 @@ class EditProductView(APIView):
             logger.exception("An error occurred while editing the product.")
             return Response({"error": str(e)}, status=500)
 
+
 class CreateProductAPIView(APIView):
     parser_classes = [MultiPartParser, FormParser]
 
@@ -180,41 +181,30 @@ class CreateProductAPIView(APIView):
         try:
             logger.info("Received product creation request.")
 
-            name = request.data.get('name')
-            description = request.data.get('description')
-            # is the category passed in a string
-            # is it an id?
-
-            # if (string), this means admin is wanting to create a new category.
-            # if it is an ID, this means that the admin will be wanting to
-            # utilize an exisiting category.
-
-            category = request.data.get('category')
-            logger.info("Here is the category that was passed in: ", category)
-
+            name = request.data.get('name', '').strip()
+            description = request.data.get('description', '').strip()
+            raw_category = request.data.get('category', '').strip()
             image = request.FILES.get('image')
-
-            logger.debug(f"Raw data: name={name}, category={category}, image={bool(image)}")
 
             try:
                 price = Decimal(request.data.get('price'))
-                logger.debug(f"Parsed price: {price}")
             except (TypeError, InvalidOperation):
-                logger.error("Invalid price format", exc_info=True)
                 return Response({'error': 'Invalid price format.'}, status=400)
 
             ingredients = json.loads(request.data.get('ingredients', '[]'))
             extras = json.loads(request.data.get('extras', '[]'))
 
-            logger.debug(f"Parsed ingredients: {ingredients}")
-            logger.debug(f"Parsed extras: {extras}")
-
-            if not all([name, description, price, category]):
-                logger.warning("Missing required fields.")
+            if not all([name, description, price, raw_category]):
                 return Response({'error': 'Missing required fields.'}, status=400)
 
-            category, _ = Category.objects.get_or_create(name=category)
-            logger.debug(f"Found category: {category.name}")
+            # Handle existing category by ID or create new category by name
+            try:
+                if raw_category.isdigit():
+                    category = Category.objects.get(id=int(raw_category))
+                else:
+                    category, _ = Category.objects.get_or_create(name=raw_category)
+            except Category.DoesNotExist:
+                return Response({'error': 'Invalid category ID.'}, status=400)
 
             product = Product.objects.create(
                 name=name,
@@ -224,7 +214,6 @@ class CreateProductAPIView(APIView):
                 image=image,
                 slug=slugify(name)
             )
-            logger.info(f"Created product: {product.name}")
 
             # Handle Ingredients
             for ing in ingredients:
@@ -239,7 +228,6 @@ class CreateProductAPIView(APIView):
                     defaults={'extra_price': ing_price}
                 )
                 product.ingredients.add(ingredient)
-                logger.debug(f"Linked ingredient: {ing_name}")
 
             # Handle Extras
             for ex in extras:
@@ -254,14 +242,10 @@ class CreateProductAPIView(APIView):
                     defaults={'price': ex_price}
                 )
                 product.extras.add(extra)
-                logger.debug(f"Linked extra: {ex_name}")
 
-            logger.info(f"Product creation complete: {product.name}")
+            logger.info(f"Created product: {product.name}")
             return Response({'success': True, 'product_id': product.id}, status=201)
 
-        except Category.DoesNotExist:
-            logger.error("Invalid category ID", exc_info=True)
-            return Response({'error': 'Invalid category.'}, status=400)
         except Exception as e:
-            logger.critical("Unhandled error during product creation", exc_info=True)
+            logger.exception("Unhandled error during product creation")
             return Response({'error': str(e)}, status=500)
